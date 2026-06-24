@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Baradhu - Afaan Ingilizii Baradhu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- ================= WELCOME SCREEN ================= -->
+        <div id="language-screen" class="screen active">
+            <div class="welcome-bg">
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                    <div class="shape shape-4"></div>
+                    <div class="shape shape-5"></div>
+                </div>
+                <div class="particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+            </div>
+
+            <div class="screen-content">
+                <div class="welcome-hero">
+                    <div class="logo-container">
+                        <div class="logo-glow"></div>
+                        <div class="logo-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-text">
+                        <div class="welcome-emojis">
+                            <span class="emoji-float" style="animation-delay: 0s;">📚</span>
+                            <span class="emoji-float" style="animation-delay: 0.2s;">🎓</span>
+                            <span class="emoji-float" style="animation-delay: 0.4s;">✨</span>
+                            <span class="emoji-float" style="animation-delay: 0.6s;">🌟</span>
+                        </div>
+                        
+                        <h1 class="app-title-gradient">Baradhu</h1>
+                        <p class="app-subtitle-main">Afaan Ingilizii Baradhu</p>
+                        <p class="app-tagline">
+                            <i class="fas fa-sparkles"></i>
+                            Afaan Ingilizii salphaadhaan baradhu
+                        </p>
+                    </div>
+                </div>
+
+                <div class="language-card-premium">
+                    <div class="card-shine"></div>
+                    <div class="card-content">
+                        <div class="flag-container">
+                            <div class="flag-glow"></div>
+                            <span class="lang-flag-big">🇬🇧</span>
+                        </div>
+                        
+                        <div class="card-text">
+                            <h3 class="card-title">Afaan Ingilizii</h3>
+                            <p class="card-desc">Ingilizii haaraa baradhu</p>
+                        </div>
+                        
+                        <div class="card-features">
+                            <div class="feature-badge">
+                                <i class="fas fa-book-open"></i>
+                                <span>Barnoota 12+</span>
+                            </div>
+                            <div class="feature-badge">
+                                <i class="fas fa-font"></i>
+                                <span>Jecha 1000+</span>
+                            </div>
+                        </div>
+                        
+                        <button class="start-btn-premium" onclick="startApp()">
+                            <span class="btn-text">Jalqabi</span>
+                            <div class="btn-icon">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div class="btn-shine"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bottom-features">
+                    <div class="bottom-feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>Saffisaa</span>
+                    </div>
+                    <div class="bottom-feature">
+                        <i class="fas fa-wifi"></i>
+                        <span>Offline</span>
+                    </div>
+                    <div class="bottom-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Nageenya</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= LOGIN SCREEN ================= -->
+        <div id="login-screen" class="screen">
+            <div class="auth-screen-content">
+                <div class="auth-header">
+                    <div class="auth-icon">🔐</div>
+                    <h2>Seeni</h2>
+                    <p>Lakkoofsa bilbilaa keetiin seeni</p>
+                </div>
+                
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Lakkoofsa Bilbilaa</label>
+                        <input type="tel" id="login-phone" class="form-input" placeholder="09XXXXXXXX" maxlength="10">
+                    </div>
+                    
+                    <button class="auth-btn primary" onclick="loginUser()">
+                        <i class="fas fa-sign-in-alt"></i> Seeni
+                    </button>
+                    
+                    <div class="auth-divider"><span>ykn</span></div>
+                    
+                    <button class="auth-btn secondary" onclick="showRegisterScreen()">
+                        <i class="fas fa-user-plus"></i> Galmeessi Haaraa
+                    </button>
+                    
+                    <button class="back-link" onclick="showScreen('language-screen')">
+                        <i class="fas fa-arrow-left"></i> Duubatti Deebi'i
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= REGISTER SCREEN ================= -->
+        <div id="register-screen" class="screen">
+            <div class="auth-screen-content">
+                <div class="auth-header">
+                    <div class="auth-icon">👤</div>
+                    <h2>Galmeessi</h2>
+                    <p>Odeeffannoo kee galchi</p>
+                </div>
+                
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Maqaa Guutuu</label>
+                        <input type="text" id="reg-name" class="form-input" placeholder="Fkn: Abdisa Tolasaa" maxlength="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Lakkoofsa Bilbilaa</label>
+                        <input type="tel" id="reg-phone" class="form-input" placeholder="09XXXXXXXX" maxlength="10">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="reg-terms">
+                            <span>Haala tajaajilaa nan fudhadha</span>
+                        </label>
+                    </div>
+                    
+                    <button class="auth-btn primary" onclick="registerUser()">
+                        <i class="fas fa-user-plus"></i> Galmeessi
+                    </button>
+                    
+                    <button class="back-link" onclick="showScreen('login-screen')">
+                        <i class="fas fa-arrow-left"></i> Duraan Galmaa'een Ture
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= HOME SCREEN ================= -->
+        <div id="home-screen" class="screen">
+            <header class="modern-header">
+                <div class="header-left">
+                    <div class="user-avatar" id="user-avatar">👋</div>
+                    <div class="user-info">
+                        <span class="greeting" id="user-greeting">Akkam!</span>
+                        <span class="user-level" id="user-name">Barataa</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="xp-display">
+                        <i class="fas fa-star"></i>
+                        <span id="total-xp">0</span>
+                    </div>
+                    <button class="icon-btn" onclick="showUserMenu()" title="Menu">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <a href="developer.html" class="icon-btn" title="Developer">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                </div>
+            </header>
+            
+            <div class="progress-section">
+                <div class="progress-card">
+                    <div class="progress-info">
+                        <h3>Adeemsa Keenya</h3>
+                        <p id="progress-text">0 / 12 Barnoota</p>
+                    </div>
+                    <div class="progress-ring">
+                        <svg width="80" height="80">
+                            <circle class="progress-bg" cx="40" cy="40" r="36"></circle>
+                            <circle class="progress-fill" id="progress-ring-fill" cx="40" cy="40" r="36"></circle>
+                        </svg>
+                        <span class="progress-percent" id="progress-percent">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="premium-banner-container"></div>
+            
+            <div class="lessons-section">
+                <h2 class="section-title">
+                    <i class="fas fa-book-open"></i> Barnoota
+                </h2>
+                <div class="lessons-grid" id="lessons-grid"></div>
+            </div>
+        </div>
+
+        <!-- ================= LEARN SCREEN ================= -->
+        <div id="learn-screen" class="screen">
+            <header class="modern-header">
+                <button class="icon-btn" onclick="showScreen('home-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="lesson-progress">
+                    <div class="progress-dots" id="lesson-progress-dots"></div>
+                </div>
+                <div class="lesson-counter" id="lesson-counter">1/10</div>
+            </header>
+            
+            <main class="learn-content">
+                <div class="flashcard-wrapper">
+                    <div class="flashcard-container" onclick="flipCard()">
+                        <div class="flashcard" id="flashcard">
+                            <div class="card-face card-front">
+                                <div class="card-badge" id="front-lang-label">Afaan Ingilizii</div>
+                                <div class="word-display" id="word-primary">Hello</div>
+                                <div class="tap-hint">
+                                    <i class="fas fa-hand-pointer"></i>
+                                    <span>Tuqi hiika argachuuf</span>
+                                </div>
+                            </div>
+                            <div class="card-face card-back">
+                                <div class="card-badge" id="back-lang-label">Afaan Oromo</div>
+                                <div class="word-display" id="word-secondary">Nagaa</div>
+                                <div class="example-container">
+                                    <div class="example-label">
+                                        <i class="fas fa-quote-left"></i> Fakkeenya
+                                    </div>
+                                    <p class="example-text" id="word-example">"Hello, how are you?"</p>
+                                    <p class="example-translation" id="word-example-om">→ "Nagaa, akkam jirta?"</p>
+                                </div>
+                                <p class="explanation" id="word-explanation">Jecha nagaa gaafachuuf fayyadamnu.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🎨 SUPER ATTRACTIVE NAVIGATION BUTTONS -->
+                <div class="flashcard-navigation">
+                    <!-- Previous Button -->
+                    <button class="nav-btn nav-prev" onclick="previousCard()" id="prev-btn">
+                        <span class="btn-bg-animation"></span>
+                        <span class="btn-shine"></span>
+                        <span class="btn-particles">
+                            <i></i><i></i><i></i>
+                        </span>
+                        <div class="btn-content">
+                            <div class="btn-icon">
+                                <i class="fas fa-arrow-left"></i>
+                            </div>
+                            <div class="btn-text">
+                                <span class="btn-main">Previous</span>
+                                <span class="btn-sub">Go Back</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Page Counter -->
+                    <div class="page-indicator">
+                        <div class="indicator-ring">
+                            <svg width="60" height="60">
+                                <circle class="ring-bg" cx="30" cy="30" r="26"></circle>
+                                <circle class="ring-fill" id="card-progress-ring" cx="30" cy="30" r="26"></circle>
+                            </svg>
+                            <div class="indicator-text">
+                                <span id="current-page">1</span>
+                                <span class="divider">/</span>
+                                <span id="total-pages">10</span>
+                            </div>
+                        </div>
+                        <div class="counter-label">Card</div>
+                    </div>
+
+                    <!-- Next Button -->
+                    <button class="nav-btn nav-next" onclick="nextCard()" id="next-btn">
+                        <span class="btn-bg-animation"></span>
+                        <span class="btn-shine"></span>
+                        <span class="btn-particles">
+                            <i></i><i></i><i></i>
+                        </span>
+                        <div class="btn-content">
+                            <div class="btn-text">
+                                <span class="btn-main" id="next-main">Next</span>
+                                <span class="btn-sub" id="next-sub">Continue</span>
+                            </div>
+                            <div class="btn-icon">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <!-- ================= QUIZ SCREEN ================= -->
+        <div id="quiz-screen" class="screen">
+            <header class="modern-header">
+                <div class="quiz-header-info">
+                    <i class="fas fa-brain"></i>
+                    <span>Qormaata</span>
+                </div>
+                <div class="quiz-score">
+                    <i class="fas fa-star"></i>
+                    <span id="quiz-current-score">0</span>
+                </div>
+            </header>
+            
+            <main class="quiz-content">
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="quiz-progress"></div>
+                </div>
+                
+                <div class="quiz-question-card">
+                    <div class="question-label">
+                        <i class="fas fa-question-circle"></i>
+                        Jechi kun Afaan Oromootti maal jechuu dha?
+                    </div>
+                    <div class="question-word" id="quiz-word">Hello</div>
+                </div>
+                
+                <div class="quiz-options" id="quiz-options"></div>
+                
+                <button id="quiz-next-btn" class="quiz-next-btn hidden" onclick="nextQuestion()">
+                    Gaaffii Itti Aanu <i class="fas fa-arrow-right"></i>
+                </button>
+            </main>
+        </div>
+
+        <!-- ================= RESULT SCREEN ================= -->
+        <div id="result-screen" class="screen">
+            <div class="result-wrapper">
+                <div class="confetti-container" id="confetti"></div>
+                
+                <div class="result-card">
+                    <div class="result-emoji" id="result-emoji">🏆</div>
+                    <h2 class="result-title" id="result-title">Baga Gammaddan!</h2>
+                    
+                    <div class="score-display">
+                        <div class="score-circle" id="score-circle">
+                            <div class="score-percentage" id="score-percentage">100%</div>
+                            <div class="score-detail" id="score-detail">3/3 sirrii</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stars-rating" id="stars-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    
+                    <p class="result-message" id="result-message">Hojii ajaa'ibaa!</p>
+                    
+                    <div class="xp-gained">
+                        <i class="fas fa-star"></i>
+                        <span>+<span id="xp-gained">50</span> XP</span>
+                    </div>
+                    
+                    <div class="result-buttons">
+                        <button id="retry-btn" class="result-btn secondary hidden" onclick="retryLesson()">
+                            <i class="fas fa-redo"></i> Irra Deebi'i
+                        </button>
+                        <button id="next-lesson-btn" class="result-btn primary hidden" onclick="goToNextLesson()">
+                            Barnoota Itti Aanu <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="result-btn home" onclick="showScreen('home-screen')">
+                            <i class="fas fa-home"></i> Gara Mana
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PREMIUM MODAL ================= -->
+        <div id="premium-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="closePremiumModal()"></div>
+            <div class="modal-content">
+                <button class="modal-close" onclick="closePremiumModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="modal-header">
+                    <div class="premium-icon">💎</div>
+                    <h2>Barnoota Premium</h2>
+                    <p id="premium-status-text">Koodii banumsaa galchi</p>
+                </div>
+                
+                <div class="waiting-section" id="waiting-section">
+                    <div class="waiting-icon">⏳</div>
+                    <h3>Koodii Eegaa Jirra...</h3>
+                    <p>Admin koodii banumsaa Telegram irratti siif erga.</p>
+                    
+                    <a href="https://t.me/jabaa1" target="_blank" class="telegram-btn">
+                        <i class="fab fa-telegram"></i> @jabaa1 Irratti Koodii Gaafadhu
+                    </a>
+                    
+                    <div class="payment-info">
+                        <h4><i class="fas fa-info-circle"></i> Kaffaltii: 150 ETB</h4>
+                        <div class="payment-method">
+                            <p><strong>📱 Telebirr:</strong></p>
+                            <p class="payment-detail">Maqaa: <span id="telebirr-name">YAIKOB TESGERA</span></p>
+                            <p class="payment-detail">Lakkoofsa: <span id="telebirr-number">0917345202</span></p>
+                            
+                            <p style="margin-top: 15px;"><strong>🏦 Awash Bank:</strong></p>
+                            <p class="payment-detail">Maqaa: <span id="awash-name">YAIKOB TESGERA</span></p>
+                            <p class="payment-detail">Lakkoofsa: <span id="awash-number">013201771325500</span></p>
+                            <p class="payment-detail">Damee: <span id="awash-branch">Addis Ababa</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activation-section">
+                    <h4><i class="fas fa-key"></i> Koodii Banumsaa Galchi</h4>
+                    <div class="code-input-group">
+                        <input type="text" id="activation-code-input" class="code-input" placeholder="BARADHU-XXXX-XXXX" maxlength="20">
+                        <button class="activate-btn" onclick="verifyActivationCode()">
+                            <i class="fas fa-unlock"></i>
+                        </button>
+                    </div>
+                    <div class="attempts-info" id="attempts-info">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="attempts-text">Yaalii hafe: <strong>3</strong></span>
+                    </div>
+                </div>
+                
+                <div id="activation-error" class="activation-error hidden">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="error-message">Kodiin sirrii miti!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= USER MENU MODAL ================= -->
+        <div id="user-menu-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="closeUserMenu()"></div>
+            <div class="modal-content user-menu-content">
+                <button class="modal-close" onclick="closeUserMenu()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="user-menu-header">
+                    <div class="user-menu-avatar" id="menu-avatar">👤</div>
+                    <h3 id="menu-user-name">User</h3>
+                    <p id="menu-user-phone">09XXXXXXXX</p>
+                </div>
+                
+                <div class="user-menu-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <span id="menu-xp">0 XP</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menu-lessons">0 Barnoota</span>
+                    </div>
+                </div>
+                
+                <div class="user-menu-actions">
+                    <button class="menu-action-btn" onclick="showToast('👤 Piroofiila')">
+                        <i class="fas fa-user"></i>
+                        <span>Piroofiila</span>
+                    </button>
+                    <button class="menu-action-btn" onclick="showToast('🏆 Milkii')">
+                        <i class="fas fa-trophy"></i>
+                        <span>Milkii</span>
+                    </button>
+                    <button class="menu-action-btn danger" onclick="logoutUser()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Ba'i (Logout)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= CONFIRM MODAL ================= -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content confirm-content">
+                <div class="confirm-icon" id="confirm-icon">⚠️</div>
+                <h3 id="confirm-title">Mirkaneessi</h3>
+                <p id="confirm-message">Kana gochuu barbaadda?</p>
+                <div class="confirm-buttons">
+                    <button class="confirm-cancel" onclick="closeConfirmModal()">Haquu</button>
+                    <button class="confirm-ok" id="confirm-ok-btn">Eeyyee</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Load lesson files -->
+    <script src="data/lesson1.js"></script>
+    <script src="data/lesson2.js"></script>
+    <script src="data/lesson3.js"></script>
+    <script src="data/lesson4.js"></script>
+    <script src="data/lesson5.js"></script>
+    <script src="data/lesson6.js"></script>
+    <script src="data/lesson7.js"></script>
+    <script src="data/lesson8.js"></script>
+    <script src="data/lesson9.js"></script>
+    <script src="data/lesson10.js"></script>
+    <script src="data/lesson11.js"></script>
+    <script src="data/lesson12.js"></script>
+    <script src="data/loader.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
