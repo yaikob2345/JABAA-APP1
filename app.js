@@ -1,8 +1,8 @@
 // ============================================
-// BARADHU - COMPLETE APP LOGIC
+// BARADHU - COMPLETE APP LOGIC (FIXED)
 // ============================================
 
-// Global variables
+// Global Variables
 let currentLanguage = 'english';
 let currentLesson = null;
 let currentCardIndex = 0;
@@ -13,83 +13,124 @@ let totalXP = 0;
 let currentUser = null;
 let confirmCallback = null;
 
-// Load saved data
-try {
-    completedLessons = JSON.parse(localStorage.getItem('baradhu_completed')) || [];
-    totalXP = parseInt(localStorage.getItem('baradhu_xp')) || 0;
-} catch (e) {
-    completedLessons = [];
-    totalXP = 0;
-}
-
 // ============================================
-// INITIALIZATION
+// 1. INITIALIZATION - RUNS ON PAGE LOAD
 // ============================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    if (!MASTER_LESSONS || MASTER_LESSONS.length === 0) {
-        console.error('Lessons not loaded!');
+    console.log('🚀 Baradhu app starting...');
+    
+    // Check if lessons loaded
+    if (typeof MASTER_LESSONS === 'undefined' || MASTER_LESSONS.length === 0) {
+        console.error('❌ Lessons not loaded!');
+        alert('Error: Lessons not loaded. Please refresh the page.');
         return;
     }
     
-    console.log('✅ Baradhu app initialized');
-    console.log('📚 Lessons loaded:', MASTER_LESSONS.length);
+    console.log(`✅ Loaded ${MASTER_LESSONS.length} lessons`);
+    
+    // Load saved data from localStorage
+    loadData();
+    
+    // Setup admin access
+    setupAdminAccess();
     
     // Check if user has active session
-    const hasSession = localStorage.getItem('baradhu_started');
+    const hasStarted = localStorage.getItem('baradhu_started');
+    const hasUser = localStorage.getItem('baradhu_current_user');
     
-    if (hasSession) {
-        // Try to load user
+    if (hasStarted && hasUser) {
+        // User is logged in - load home screen
         currentUser = getCurrentUser();
-        
-        if (!currentUser) {
-            // User data missing - force logout
-            console.log('⚠️ User data missing, clearing session');
+        if (currentUser) {
+            console.log('✅ User logged in:', currentUser.name);
+            showScreen('home-screen');
+            initializeHomeScreen();
+        } else {
+            // User data missing - reset
+            console.log('⚠️ User data missing, resetting...');
             localStorage.removeItem('baradhu_started');
             localStorage.removeItem('baradhu_current_user');
             showScreen('language-screen');
-            return;
         }
-        
-        // User exists - go to home
-        showScreen('home-screen');
-        updateUserUI();
-        renderLessonsGrid();
-        updateProgressUI();
     } else {
         // No session - show welcome screen
+        console.log('👋 Showing welcome screen');
         showScreen('language-screen');
+    }
+    
+    // Check for admin URL parameter
+    if (window.location.search.includes('admin=1')) {
+        setTimeout(openAdminPanel, 500);
     }
 });
 
 // ============================================
-// SCREEN MANAGEMENT
+// 2. LOAD SAVED DATA
 // ============================================
-
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(screenId);
-    if (screen) {
-        screen.classList.add('active');
+function loadData() {
+    try {
+        // Load completed lessons
+        const savedLessons = localStorage.getItem('baradhu_completed');
+        if (savedLessons) {
+            completedLessons = JSON.parse(savedLessons);
+        }
+        
+        // Load XP
+        const savedXP = localStorage.getItem('baradhu_xp');
+        if (savedXP) {
+            totalXP = parseInt(savedXP);
+        }
+        
+        console.log(`📊 Loaded: ${completedLessons.length} lessons, ${totalXP} XP`);
+    } catch (e) {
+        console.error('❌ Error loading data:', e);
+        completedLessons = [];
+        totalXP = 0;
     }
 }
 
 // ============================================
-// APP START - FROM WELCOME SCREEN
+// 3. SCREEN MANAGEMENT
 // ============================================
+function showScreen(screenId) {
+    console.log(`📺 Showing screen: ${screenId}`);
+    
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    
+    // Show target screen
+    const screen = document.getElementById(screenId);
+    if (screen) {
+        screen.classList.add('active');
+        
+        // Initialize screen-specific content
+        if (screenId === 'home-screen') {
+            initializeHomeScreen();
+        }
+    } else {
+        console.error(`❌ Screen not found: ${screenId}`);
+    }
+}
 
+// ============================================
+// 4. START APP (from welcome screen)
+// ============================================
 function startApp() {
+    console.log('🚀 Starting app...');
+    
+    // Mark app as started
     localStorage.setItem('baradhu_started', 'true');
     
     // Check if user already logged in
-    const existingUser = getCurrentUser();
+    const currentUserData = getCurrentUser();
     
-    if (existingUser) {
-        currentUser = existingUser;
+    if (currentUserData) {
+        // User already logged in - go to home
+        currentUser = currentUserData;
         showScreen('home-screen');
-        updateUserUI();
-        renderLessonsGrid();
-        updateProgressUI();
+        initializeHomeScreen();
     } else {
         // Show login screen
         showScreen('login-screen');
@@ -97,21 +138,48 @@ function startApp() {
 }
 
 // ============================================
-// LOGIN / REGISTER SCREENS
+// 5. INITIALIZE HOME SCREEN
 // ============================================
-
-function showRegisterScreen() {
-    showScreen('register-screen');
-    document.getElementById('reg-name').value = '';
-    document.getElementById('reg-phone').value = '';
-    document.getElementById('reg-terms').checked = false;
+function initializeHomeScreen() {
+    console.log('🏠 Initializing home screen');
+    
+    // Update user UI
+    updateUserUI();
+    
+    // Update XP display
+    updateXPDisplay();
+    
+    // Render lessons grid
+    renderLessonsGrid();
+    
+    // Update progress
+    updateProgressUI();
+    
+    // Render premium banner
+    renderPremiumBanner();
 }
 
+// ============================================
+// 6. USER AUTHENTICATION
+// ============================================
+
+// Show Register Screen
+function showRegisterScreen() {
+    showScreen('register-screen');
+    // Clear form
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-phone').value = '';
+    const termsCheckbox = document.getElementById('reg-terms');
+    if (termsCheckbox) termsCheckbox.checked = false;
+}
+
+// Register New User
 function registerUser() {
     const name = document.getElementById('reg-name').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
-    const terms = document.getElementById('reg-terms').checked;
+    const terms = document.getElementById('reg-terms') ? document.getElementById('reg-terms').checked : true;
     
+    // Validation
     if (!name || name.length < 2) {
         showToast('⚠️ Maqaa sirrii galchi!');
         return;
@@ -128,8 +196,8 @@ function registerUser() {
     }
     
     // Check if phone already registered
-    const existing = findUserByPhone(phone);
-    if (existing) {
+    const existingUser = findUserByPhone(phone);
+    if (existingUser) {
         showToast('⚠️ Lakkoofsi kanaan dura galmaa\'eera. Seeni.');
         setTimeout(() => {
             document.getElementById('login-phone').value = phone;
@@ -139,7 +207,6 @@ function registerUser() {
     }
     
     // Create new user
-    const users = loadUsers();
     const newUser = {
         id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         name: name,
@@ -154,6 +221,8 @@ function registerUser() {
         lockedUntil: null
     };
     
+    // Save user
+    const users = loadUsers();
     users.push(newUser);
     saveUsers(users);
     
@@ -161,25 +230,33 @@ function registerUser() {
     setCurrentUser(newUser.id);
     currentUser = newUser;
     
+    console.log('✅ User registered:', newUser.name);
     showToast('✅ Galmeen kee milkaa\'eera!');
+    
+    // Go to home screen
     showScreen('home-screen');
-    updateUserUI();
-    renderLessonsGrid();
-    updateProgressUI();
+    initializeHomeScreen();
 }
 
+// Show Login Screen
+function showLoginScreen() {
+    showScreen('login-screen');
+    document.getElementById('login-phone').value = '';
+}
+
+// Login User
 function loginUser() {
     const phone = document.getElementById('login-phone').value.trim();
     
     if (!phone || !/^09\d{8}$/.test(phone)) {
-        showToast('⚠️ Lakkoofsa bilbilaa sirrii galchi (09XXXXXXXX)!');
+        showToast('⚠️ Lakkoofsa bilbilaa sirrii galchi!');
         return;
     }
     
     const user = findUserByPhone(phone);
     
     if (!user) {
-        showToast('❌ Lakkoofsi kanaan hin galmoofne. Dursa galmeessi.');
+        showToast('❌ Lakkoofsi kanaan hin galmoofne. Galmeessi.');
         setTimeout(() => {
             document.getElementById('reg-phone').value = phone;
             showScreen('register-screen');
@@ -191,54 +268,65 @@ function loginUser() {
     setCurrentUser(user.id);
     currentUser = user;
     
+    console.log('✅ User logged in:', user.name);
     showToast(`✅ Baga nagaan dhuftan, ${user.name}!`);
+    
+    // Go to home screen
     showScreen('home-screen');
-    updateUserUI();
-    renderLessonsGrid();
-    updateProgressUI();
+    initializeHomeScreen();
 }
 
-// ============================================
-// LOGOUT - COMPLETE RESET
-// ============================================
-
+// Logout User
 function logoutUser() {
     showConfirm(
         'Ba\'uu barbaadda?',
         'Herrega kee keessaa baha. Irra deebi\'uuf odeeffannoo kee galchuu qabda.',
         '👋',
         function() {
-            // Clear ALL session data
+            // Clear session
             localStorage.removeItem('baradhu_started');
             localStorage.removeItem('baradhu_current_user');
-            localStorage.removeItem('baradhu_premium');
-            
-            // Reset variables
             currentUser = null;
             
-            // Reset XP display
-            const xpDisplay = document.getElementById('total-xp');
-            if (xpDisplay) xpDisplay.innerText = '0';
+            console.log('👋 User logged out');
+            showToast('👋 Nagaatti!');
             
-            // Close any open modals
-            closeUserMenu();
-            closePremiumModal();
-            
-            // Show welcome screen
+            // Go to welcome screen
             showScreen('language-screen');
-            
-            showToast('👋 Nagaatti! Irra deebi\'uuf seeni.');
         }
     );
 }
 
 // ============================================
-// USER MENU
+// 7. USER UI UPDATES
 // ============================================
-
-function showUserMenu() {
-    if (!currentUser) return;
+function updateUserUI() {
+    if (!currentUser) {
+        console.log('⚠️ No current user to update UI');
+        return;
+    }
     
+    console.log('🔄 Updating user UI for:', currentUser.name);
+    
+    // Update header
+    const avatar = document.getElementById('user-avatar');
+    const greeting = document.getElementById('user-greeting');
+    const userName = document.getElementById('user-name');
+    
+    if (avatar) {
+        avatar.innerText = currentUser.name.charAt(0).toUpperCase();
+    }
+    
+    if (greeting) {
+        const firstName = currentUser.name.split(' ')[0];
+        greeting.innerText = `Akkam, ${firstName}!`;
+    }
+    
+    if (userName) {
+        userName.innerText = 'Barataa';
+    }
+    
+    // Update user menu
     const menuAvatar = document.getElementById('menu-avatar');
     const menuName = document.getElementById('menu-user-name');
     const menuPhone = document.getElementById('menu-user-phone');
@@ -250,64 +338,26 @@ function showUserMenu() {
     if (menuPhone) menuPhone.innerText = currentUser.phone;
     if (menuXP) menuXP.innerText = totalXP + ' XP';
     if (menuLessons) menuLessons.innerText = completedLessons.length + ' Barnoota';
-    
-    document.getElementById('user-menu-modal').classList.remove('hidden');
 }
 
-function closeUserMenu() {
-    document.getElementById('user-menu-modal').classList.add('hidden');
-}
-
-function updateUserUI() {
-    if (!currentUser) return;
-    
-    const avatar = document.getElementById('user-avatar');
-    const greeting = document.getElementById('user-greeting');
-    const userName = document.getElementById('user-name');
-    
-    if (avatar) avatar.innerText = currentUser.name.charAt(0).toUpperCase();
-    if (greeting) greeting.innerText = `Akkam, ${currentUser.name.split(' ')[0]}!`;
-    if (userName) userName.innerText = 'Barataa';
-    
-    const xpDisplay = document.getElementById('total-xp');
-    if (xpDisplay) xpDisplay.innerText = totalXP;
+function updateXPDisplay() {
+    const xpElement = document.getElementById('total-xp');
+    if (xpElement) {
+        xpElement.innerText = totalXP;
+    }
 }
 
 // ============================================
-// CONFIRM MODAL
+// 8. HOME SCREEN RENDERING
 // ============================================
-
-function showConfirm(title, message, icon, callback) {
-    document.getElementById('confirm-icon').innerText = icon;
-    document.getElementById('confirm-title').innerText = title;
-    document.getElementById('confirm-message').innerText = message;
-    
-    confirmCallback = callback;
-    
-    const okBtn = document.getElementById('confirm-ok-btn');
-    okBtn.onclick = function() {
-        closeConfirmModal();
-        if (confirmCallback) {
-            confirmCallback();
-        }
-    };
-    
-    document.getElementById('confirm-modal').classList.remove('hidden');
-}
-
-function closeConfirmModal() {
-    document.getElementById('confirm-modal').classList.add('hidden');
-    confirmCallback = null;
-}
-
-// ============================================
-// HOME SCREEN
-// ============================================
-
 function renderLessonsGrid() {
     const grid = document.getElementById('lessons-grid');
-    if (!grid) return;
+    if (!grid) {
+        console.error('❌ Lessons grid not found');
+        return;
+    }
     
+    console.log('📚 Rendering lessons grid');
     grid.innerHTML = '';
     
     const hasPremium = localStorage.getItem('baradhu_premium') === 'true';
@@ -318,9 +368,11 @@ function renderLessonsGrid() {
         
         const card = document.createElement('div');
         let cardClass = 'lesson-card';
+        
         if (isCompleted) cardClass += ' completed';
         if (lesson.isPremium && !isLocked) cardClass += ' unlocked';
         if (isLocked) cardClass += ' premium';
+        
         card.className = cardClass;
         
         card.onclick = () => {
@@ -368,6 +420,7 @@ function updateProgressUI() {
     
     if (progressText) progressText.innerText = `${completed} / ${total} Barnoota`;
     if (progressPercent) progressPercent.innerText = `${Math.round(percent)}%`;
+    
     if (progressRing) {
         const circumference = 2 * Math.PI * 36;
         const offset = circumference - (percent / 100) * circumference;
@@ -375,149 +428,39 @@ function updateProgressUI() {
     }
 }
 
-// ============================================
-// PREMIUM MODAL
-// ============================================
-
-function openPremiumModal() {
-    if (!currentUser) {
-        showScreen('login-screen');
-        return;
+function renderPremiumBanner() {
+    const container = document.getElementById('premium-banner-container');
+    if (!container) return;
+    
+    const hasPremium = localStorage.getItem('baradhu_premium') === 'true';
+    
+    if (!hasPremium) {
+        container.innerHTML = `
+            <div class="premium-banner" onclick="openPremiumModal()">
+                <div class="banner-content">
+                    <div class="banner-icon">💎</div>
+                    <div class="banner-info">
+                        <h3>Barnoota Premium Bani</h3>
+                        <p>Barnoota 12 fi jecha 1000+ argadhu</p>
+                    </div>
+                    <button class="banner-btn">Bani <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = '';
     }
-    
-    // Refresh user data
-    currentUser = findUserById(currentUser.id);
-    
-    document.getElementById('premium-modal').classList.remove('hidden');
-    document.getElementById('activation-error').classList.add('hidden');
-    document.getElementById('activation-code-input').value = '';
-    
-    // Update payment info from config
-    if (typeof PREMIUM_CONFIG !== 'undefined') {
-        // Telebirr info
-        document.getElementById('telebirr-name').innerText = PREMIUM_CONFIG.telebirr.accountName;
-        document.getElementById('telebirr-number').innerText = PREMIUM_CONFIG.telebirr.number;
-        
-        // Awash Bank info
-        document.getElementById('awash-name').innerText = PREMIUM_CONFIG.awashBank.accountName;
-        document.getElementById('awash-number').innerText = PREMIUM_CONFIG.awashBank.accountNumber;
-        document.getElementById('awash-branch').innerText = PREMIUM_CONFIG.awashBank.branch;
-    }
-    
-    updateAttemptsDisplay();
-}
-function closePremiumModal() {
-    document.getElementById('premium-modal').classList.add('hidden');
-}
-
-function updateAttemptsDisplay() {
-    if (!currentUser) return;
-    
-    const attemptsInfo = document.getElementById('attempts-info');
-    const attemptsText = document.getElementById('attempts-text');
-    const maxAttempts = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.maxFailedAttempts : 3;
-    const remaining = maxAttempts - (currentUser.failedAttempts || 0);
-    
-    if (attemptsText) {
-        attemptsText.innerHTML = `Yaalii hafe: <strong>${remaining}</strong>`;
-    }
-    
-    if (attemptsInfo) {
-        attemptsInfo.classList.toggle('danger', remaining <= 1);
-    }
-}
-
-function verifyActivationCode() {
-    if (!currentUser) return;
-    
-    currentUser = findUserById(currentUser.id);
-    
-    const input = document.getElementById('activation-code-input');
-    const enteredCode = input.value.trim().toUpperCase();
-    
-    if (!enteredCode) {
-        showActivationError('⚠️ Maaloo koodii galchi!');
-        return;
-    }
-    
-    const codeEntry = findCodeByValue(enteredCode);
-    
-    if (!codeEntry) {
-        handleFailedAttempt('Kodiin kun hin jiru.');
-        return;
-    }
-    
-    if (codeEntry.assignedTo !== currentUser.id) {
-        handleFailedAttempt('Kodiin kun kan nama biraati.');
-        return;
-    }
-    
-    if (codeEntry.used) {
-        handleFailedAttempt('Kodiin kun dura fayyadameera.');
-        return;
-    }
-    
-    // Success!
-    codeEntry.used = true;
-    codeEntry.usedAt = new Date().toISOString();
-    const codes = loadCodes();
-    const idx = codes.findIndex(c => c.code === codeEntry.code);
-    if (idx !== -1) codes[idx] = codeEntry;
-    saveCodes(codes);
-    
-    updateUser(currentUser.id, {
-        isActivated: true,
-        activatedAt: new Date().toISOString(),
-        failedAttempts: 0
-    });
-    
-    localStorage.setItem('baradhu_premium', 'true');
-    
-    closePremiumModal();
-    showToast('🎉 Premium banameera!');
-    renderLessonsGrid();
-}
-
-function handleFailedAttempt(errorMessage) {
-    const maxAttempts = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.maxFailedAttempts : 3;
-    const lockHours = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.lockDurationHours : 24;
-    
-    const newAttempts = (currentUser.failedAttempts || 0) + 1;
-    const updates = { failedAttempts: newAttempts };
-    
-    if (newAttempts >= maxAttempts) {
-        const lockUntil = new Date();
-        lockUntil.setHours(lockUntil.getHours() + lockHours);
-        updates.isLocked = true;
-        updates.lockedUntil = lockUntil.toISOString();
-        
-        updateUser(currentUser.id, updates);
-        currentUser = findUserById(currentUser.id);
-        
-        showActivationError(`🔒 Herregni kee sa'aatii ${lockHours}f cufameera!`);
-        return;
-    }
-    
-    updateUser(currentUser.id, updates);
-    currentUser = findUserById(currentUser.id);
-    
-    const remaining = maxAttempts - newAttempts;
-    showActivationError(`${errorMessage} (Yaalii hafe: ${remaining})`);
-}
-
-function showActivationError(message) {
-    const errorEl = document.getElementById('activation-error');
-    document.getElementById('error-message').innerText = message;
-    errorEl.classList.remove('hidden');
 }
 
 // ============================================
-// LEARN SCREEN
+// 9. LESSON & QUIZ FUNCTIONS
 // ============================================
-
 function startLesson(lessonId) {
     currentLesson = MASTER_LESSONS.find(l => l.id === lessonId);
-    if (!currentLesson) return;
+    if (!currentLesson) {
+        console.error('❌ Lesson not found:', lessonId);
+        return;
+    }
     
     currentCardIndex = 0;
     showScreen('learn-screen');
@@ -525,7 +468,6 @@ function startLesson(lessonId) {
     renderProgressDots();
 }
 
-// Update renderCard function - add this at the end
 function renderCard() {
     const word = currentLesson.words[currentCardIndex];
     const flashcard = document.getElementById('flashcard');
@@ -539,27 +481,16 @@ function renderCard() {
     document.getElementById('word-example-om').innerText = `→ "${word.exampleOromo1 || word.exampleOromo}"`;
     document.getElementById('word-explanation').innerText = word.explanation;
     
-    // Update page counter
-    document.getElementById('current-page').innerText = currentCardIndex + 1;
-    document.getElementById('total-pages').innerText = currentLesson.words.length;
+    document.getElementById('lesson-counter').innerText = `${currentCardIndex + 1}/${currentLesson.words.length}`;
     
-    // Handle Previous button state
-    const prevBtn = document.getElementById('prev-btn');
-    if (prevBtn) {
-        prevBtn.disabled = currentCardIndex === 0;
-    }
-    
-    // Handle Next button - change text on last card
     const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-        if (currentCardIndex === currentLesson.words.length - 1) {
-            nextBtn.querySelector('.nav-main-text').innerText = 'Quiz';
-            nextBtn.querySelector('.nav-sub-text').innerText = 'Start Test';
-        } else {
-            nextBtn.querySelector('.nav-main-text').innerText = 'Next';
-            nextBtn.querySelector('.nav-sub-text').innerText = 'Continue';
-        }
+    if (currentCardIndex === currentLesson.words.length - 1) {
+        nextBtn.innerHTML = 'Qormaata <i class="fas fa-brain"></i>';
+    } else {
+        nextBtn.innerHTML = 'Itti Aanu <i class="fas fa-chevron-right"></i>';
     }
+    
+    updateProgressDots();
 }
 
 function flipCard() {
@@ -588,6 +519,7 @@ function renderProgressDots() {
     
     container.innerHTML = '';
     const maxDots = Math.min(currentLesson.words.length, 10);
+    
     for (let i = 0; i < maxDots; i++) {
         const dot = document.createElement('div');
         dot.className = 'progress-dot' + (i === currentCardIndex ? ' active' : '');
@@ -600,10 +532,6 @@ function updateProgressDots() {
         dot.className = 'progress-dot' + (i === currentCardIndex ? ' active' : '');
     });
 }
-
-// ============================================
-// QUIZ
-// ============================================
 
 function startQuiz() {
     quizScore = 0;
@@ -715,10 +643,11 @@ function showResults() {
     document.getElementById('result-message').innerText = msg;
     
     document.getElementById('retry-btn').classList.toggle('hidden', passed);
+    
     const nextBtn = document.getElementById('next-lesson-btn');
-    const hasPremium = localStorage.getItem('baradhu_premium') === 'true';
     if (passed) {
         const next = MASTER_LESSONS.find(l => l.id === currentLesson.id + 1);
+        const hasPremium = localStorage.getItem('baradhu_premium') === 'true';
         if (next && (!next.isPremium || hasPremium)) {
             nextBtn.classList.remove('hidden');
             nextBtn.innerHTML = `Barnoota ${next.id}: ${next.title} <i class="fas fa-arrow-right"></i>`;
@@ -767,56 +696,244 @@ function goToNextLesson() {
 }
 
 // ============================================
-// UTILITIES
+// 10. PREMIUM MODAL FUNCTIONS
 // ============================================
+function openPremiumModal() {
+    if (!currentUser) {
+        showScreen('login-screen');
+        return;
+    }
+    
+    // Refresh user data
+    currentUser = findUserById(currentUser.id);
+    
+    document.getElementById('premium-modal').classList.remove('hidden');
+    document.getElementById('activation-error').classList.add('hidden');
+    
+    const codeInput = document.getElementById('activation-code-input');
+    if (codeInput) codeInput.value = '';
+    
+    updateAttemptsDisplay();
+}
 
+function closePremiumModal() {
+    document.getElementById('premium-modal').classList.add('hidden');
+}
+
+function updateAttemptsDisplay() {
+    if (!currentUser) return;
+    
+    const attemptsInfo = document.getElementById('attempts-info');
+    const attemptsText = document.getElementById('attempts-text');
+    const maxAttempts = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.maxFailedAttempts : 3;
+    const remaining = maxAttempts - (currentUser.failedAttempts || 0);
+    
+    if (attemptsText) {
+        attemptsText.innerHTML = `Yaalii hafe: <strong>${remaining}</strong>`;
+    }
+    
+    if (attemptsInfo) {
+        attemptsInfo.classList.toggle('danger', remaining <= 1);
+    }
+}
+
+function verifyActivationCode() {
+    if (!currentUser) return;
+    
+    currentUser = findUserById(currentUser.id);
+    
+    const input = document.getElementById('activation-code-input');
+    const enteredCode = input.value.trim().toUpperCase();
+    
+    if (!enteredCode) {
+        showActivationError('⚠️ Maaloo koodii galchi!');
+        return;
+    }
+    
+    const codeEntry = findCodeByValue(enteredCode);
+    
+    if (!codeEntry) {
+        handleFailedAttempt('Kodiin kun hin jiru.');
+        return;
+    }
+    
+    if (codeEntry.assignedTo !== currentUser.id) {
+        handleFailedAttempt('Kodiin kun kan nama biraati.');
+        return;
+    }
+    
+    if (codeEntry.used) {
+        handleFailedAttempt('Kodiin kun dura fayyadameera.');
+        return;
+    }
+    
+    // Success!
+    codeEntry.used = true;
+    codeEntry.usedAt = new Date().toISOString();
+    const codes = loadCodes();
+    const idx = codes.findIndex(c => c.code === codeEntry.code);
+    if (idx !== -1) codes[idx] = codeEntry;
+    saveCodes(codes);
+    
+    updateUser(currentUser.id, {
+        isActivated: true,
+        activatedAt: new Date().toISOString(),
+        failedAttempts: 0
+    });
+    
+    localStorage.setItem('baradhu_premium', 'true');
+    
+    closePremiumModal();
+    showToast('🎉 Premium banameera!');
+    
+    // Refresh home screen
+    initializeHomeScreen();
+}
+
+function handleFailedAttempt(errorMessage) {
+    const maxAttempts = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.maxFailedAttempts : 3;
+    const newAttempts = (currentUser.failedAttempts || 0) + 1;
+    
+    const updates = {
+        failedAttempts: newAttempts,
+        lastAttemptAt: new Date().toISOString()
+    };
+    
+    if (newAttempts >= maxAttempts) {
+        const lockUntil = new Date();
+        const lockHours = (typeof PREMIUM_CONFIG !== 'undefined') ? PREMIUM_CONFIG.lockDurationHours : 24;
+        lockUntil.setHours(lockUntil.getHours() + lockHours);
+        updates.isLocked = true;
+        updates.lockedUntil = lockUntil.toISOString();
+        
+        updateUser(currentUser.id, updates);
+        currentUser = findUserById(currentUser.id);
+        
+        showActivationError(`🔒 Herregni kee sa'aatii ${lockHours}f cufameera!`);
+        return;
+    }
+    
+    updateUser(currentUser.id, updates);
+    currentUser = findUserById(currentUser.id);
+    
+    const remaining = maxAttempts - newAttempts;
+    showActivationError(`${errorMessage} (Yaalii hafe: ${remaining})`);
+}
+
+function showActivationError(message) {
+    const errorEl = document.getElementById('activation-error');
+    const errorMsg = document.getElementById('error-message');
+    if (errorMsg) errorMsg.innerText = message;
+    if (errorEl) {
+        errorEl.classList.remove('hidden');
+        errorEl.style.animation = 'none';
+        setTimeout(() => errorEl.style.animation = 'shake 0.5s', 10);
+    }
+}
+
+// ============================================
+// 11. USER MENU
+// ============================================
+function showUserMenu() {
+    if (!currentUser) return;
+    
+    // Update menu content
+    updateUserUI();
+    
+    document.getElementById('user-menu-modal').classList.remove('hidden');
+}
+
+function closeUserMenu() {
+    document.getElementById('user-menu-modal').classList.add('hidden');
+}
+
+// ============================================
+// 12. CONFIRM MODAL
+// ============================================
+function showConfirm(title, message, icon, callback) {
+    document.getElementById('confirm-icon').innerText = icon;
+    document.getElementById('confirm-title').innerText = title;
+    document.getElementById('confirm-message').innerText = message;
+    confirmCallback = callback;
+    
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.onclick = () => {
+        closeConfirmModal();
+        if (confirmCallback) confirmCallback();
+    };
+    
+    document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    confirmCallback = null;
+}
+
+// ============================================
+// 13. ADMIN PANEL
+// ============================================
+let adminTapCount = 0;
+let adminTapTimer = null;
+
+function setupAdminAccess() {
+    const title = document.getElementById('app-title');
+    if (title) {
+        title.addEventListener('click', () => {
+            adminTapCount++;
+            clearTimeout(adminTapTimer);
+            adminTapTimer = setTimeout(() => adminTapCount = 0, 2000);
+            
+            if (adminTapCount >= 5) {
+                adminTapCount = 0;
+                openAdminPanel();
+            }
+        });
+    }
+}
+
+function openAdminPanel() {
+    const password = prompt('🔐 Admin Password:');
+    if (password !== 'jabaa2026') {
+        if (password !== null) alert('❌ Password sirrii miti!');
+        return;
+    }
+    
+    document.getElementById('admin-panel').classList.remove('hidden');
+    renderAdminDashboard();
+}
+
+function closeAdminPanel() {
+    document.getElementById('admin-panel').classList.add('hidden');
+}
+
+function renderAdminDashboard() {
+    const users = loadUsers();
+    
+    // Stats will be updated here
+    console.log('📊 Admin dashboard loaded with', users.length, 'users');
+}
+
+// ============================================
+// 14. UTILITY FUNCTIONS
+// ============================================
 function showToast(msg) {
+    console.log('💬', msg);
+    
     const toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:12px 24px;border-radius:25px;font-size:14px;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);max-width:90%;text-align:center;';
     toast.innerText = msg;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-// Update card progress indicator
-function updateCardProgress() {
-    const currentCard = currentCardIndex + 1;
-    const totalCards = currentLesson.words.length;
     
-    // Update text
-    document.getElementById('current-card-num').innerText = currentCard;
-    document.getElementById('total-card-num').innerText = totalCards;
-    
-    // Update progress ring
-    const progressRing = document.getElementById('card-progress-ring');
-    if (progressRing) {
-        const circumference = 2 * Math.PI * 26;
-        const progress = (currentCard / totalCards) * 100;
-        const offset = circumference - (progress / 100) * circumference;
-        progressRing.style.strokeDashoffset = offset;
-    }
-    
-    // Update button states
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    
-    if (prevBtn) {
-        prevBtn.disabled = currentCardIndex === 0;
-    }
-    
-    if (nextBtn) {
-        const nextLabel = document.getElementById('next-btn-label');
-        const nextSublabel = document.getElementById('next-btn-sublabel');
-        
-        if (currentCardIndex === totalCards - 1) {
-            if (nextLabel) nextLabel.innerText = 'Qormaata';
-            if (nextSublabel) nextSublabel.innerText = 'Jalqabi';
-        } else {
-            if (nextLabel) nextLabel.innerText = 'Itti Aanu';
-            if (nextSublabel) nextSublabel.innerText = 'Itti fufi';
-        }
-    }
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
 }
 
-// Call this in your renderCard 
-// Add this line at the end of renderCard():
-// updateCardProgress();
+// ============================================
+// DEBUG: Log when app is ready
+// ============================================
+console.log('📝 app.js loaded successfully');
+console.log('🔧 All functions defined and ready');
